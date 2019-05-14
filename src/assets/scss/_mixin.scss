@@ -1,0 +1,51 @@
+//font-size
+@mixin font-size($size, $base: 10)
+{
+    font-size: $size + px;
+    font-size: ($size / $base) + rem;
+}
+
+//ゴシックフォント
+$gothic: 'Open Sans', "游ゴシック", "Yu Gothic", YuGothic, "Hiragino Kaku Gothic ProN", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, "ＭＳ ゴシック", sans-serif;
+
+//明朝フォント
+$mintyo: "ヒラギノ明朝 ProN W3","Hiragino Mincho ProN","ＭＳ Ｐ明朝","MS PMincho",serif;
+
+//media quary
+$breakpoint-smp: 480px;
+$breakpoint-md: 960px;
+
+// PCレイアウト
+@mixin large {
+  @media screen and (min-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+// 中間レイアウト以上
+@mixin more_than_medium {
+  @media screen and (min-width: $breakpoint-smp + 1) {
+    @content;
+  }
+}
+
+// 中間レイアウト
+@mixin medium {
+  @media screen and (max-width: $breakpoint-md) and (min-width: $breakpoint-smp + 1) {
+    @content;
+  }
+}
+
+// 中間レイアウト以下
+@mixin less_than_medium {
+  @media screen and (max-width: $breakpoint-md - 1) {
+    @content;
+  }
+}
+
+// スマホレイアウト
+@mixin small {
+  @media screen and (max-width: $breakpoint-smp) {
+    @content;
+  }
+}

@@ -1,0 +1,47 @@
+@charset "UTF-8";
+@import url(https://fonts.googleapis.com/css?family=Montserrat:400,700|Open+Sans:400,600,700,800);
+* {
+  vertical-align: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; }
+
+body {
+  font-family: "ヒラギノ明朝 ProN W3","Hiragino Mincho ProN","ＭＳ Ｐ明朝","MS PMincho",serif;
+  line-height: 1.6;
+  letter-spacing: 0;
+  background-color: #f2f2e9;
+  color: #353535;
+  height: 100%; }
+
+html {
+  font-size: 62.5%;
+  height: 100%;
+  width: 100%; }
+
+img {
+  border: none;
+  vertical-align: bottom; }
+
+a {
+  color: #2e2e2e;
+  text-decoration: none;
+  font-weight: bold;
+  outline: none;
+  -webkit-transition: 0.5s;
+  -moz-transition: 0.5s;
+  -o-transition: 0.5s;
+  -ms-transition: 0.5s;
+  transition: 0.5s; }
+  a:hover {
+    text-decoration: underline; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: 100%; }
+
+ul li, dl, dt, dd {
+  list-style: none outside none; }
+
+button:hover{
+  cursor: pointer;
+}
