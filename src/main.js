@@ -1,20 +1,34 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
+import VueCookies from 'vue-cookies'
 import App from './App.vue'
 import router from './router'
 import store from './store'
 import './registerServiceWorker'
 import Firebase from './api/firebase'
+import moment from 'moment'
 
 
 Vue.config.productionTip = false
 Firebase.initFirebase()
 
-console.log(process.env.VUE_APP_SITE_TITLE)
+Vue.use(VueCookies)
 
-new Vue({
+// set default config
+VueCookies.config('7d')
+
+// set global cookie
+VueCookies.set('theme','default');
+VueCookies.set('hover-time','1s');
+
+//filter
+Vue.filter('formatDate', function (value) {
+  return moment(value).format('YYYY.MM.DD hh:mm')
+})
+
+const app = new Vue({
   router,
   store,
   render: h => h(App)
 }).$mount('#app')
+
+global._App = app

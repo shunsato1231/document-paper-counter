@@ -4,16 +4,30 @@
       .script(:style='styles', :class="(direction === 'h') ? 'h' : 'v'")
         .line(v-for='line in countedScript', :class="(direction === 'h') ? 'h' : 'v'")
           .square(:style='styles', :class="{ excess: row.excess }", v-for='row in line' ) {{row.text}}
-    .editor
-      button.reinput  入力し直す
-      span aaaa
-      button.save 保存する　
+    form.editor(@submit.prevent='save')
+      .inputMeta
+        div
+          p タイトル
+          input(type="text" v-model='title' required='required')
+        div
+          p 通知設定
+          input#checkbox(type='checkbox', name='deadline_action' v-model='notification')
+          label(for='checkbox') 締め切りを通知する
+          datepicker(:value='deadline', v-model='deadline', :required='notification', :disabled='!notification')
+      .buttonWrap
+        button.reinput(type="button" @click="reinput") 入力し直す
+        button.save(type='submit') 保存する
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
+import Datepicker from 'vuejs-datepicker'
+
 export default {
   name: 'Result',
+  components: {
+    Datepicker
+  },
   computed: {
     styles () {
       return {
@@ -22,13 +36,40 @@ export default {
         '--scriptHeight': this.scriptHeight
       }
     },
+    title: {
+      get () {
+        return this.$store.getters['counter/title']
+      },
+      set (value) {
+        this.$store.commit('counter/setTitle', value)
+      }
+    },
+    deadline: {
+      get () {
+        return this.$store.getters['counter/deadline']
+      },
+      set (value) {
+        this.$store.commit('counter/setDeadline', value)
+      }
+    },
+    notification: {
+      get () {
+        return this.$store.getters['counter/notification']
+      },
+      set (value) {
+        this.$store.commit('counter/setNotification', value)
+        if (!value) {
+          this.deadline = null
+        }
+      }
+    },
     ...mapGetters('counter', ['countedScript', 'direction', 'verticalLength', 'horizontalLength'])
   },
   data () {
     return {
       squareSize: 30,
       scriptWidht: 0,
-      scriptHeight: 0
+      scriptHeight: 0,
     }
   },
   beforeCreate () {
@@ -42,11 +83,22 @@ export default {
     this.scrollToLeft()
   },
   methods: {
+    ...mapActions('counter', ['saveDocument']),
     scrollToLeft () {
       if (this.direction === 'v') {
         const script = document.querySelector('.wrapper')
         script.scroll(this.scriptWidht, 0)
       }
+    },
+    save () {
+      this.$store.dispatch('counter/saveDocument')
+        .then(title => {
+          console.log(title + 'を保存しました')
+          this.$store.dispatch('list/getList')
+        })
+    },
+    reinput () {
+      this.$router.push({name: 'input'})
     }
   }
 }
@@ -117,10 +169,8 @@ export default {
   }
 
   .editor {
-    display: flex;
     width: 100%;
-    justify-content:space-between;
-    align-items: flex-end;
+    margin-top: 20px;
   }
 
   button {
@@ -167,6 +217,94 @@ export default {
       @include font-size(18);
       height: 20px;
       line-height: 20px;
+    }
+  }
+
+  .inputMeta {
+    text-align: left;
+    margin-bottom: 40px;
+    p {
+      @include font-size(16);
+      margin-top: 15px;
+    }
+  }
+
+  .buttonWrap {
+    display: flex;
+    justify-content:space-between;
+  }
+
+  input:checked + label::after{
+    opacity: 1;
+  }
+
+  input[type="checkbox"] {
+    display: none;
+  }
+
+  label{
+    display: table;
+    margin-top: 10px;
+    margin-left: 20px;
+    margin-right: 5px;
+    @include font-size(14);
+    position: relative;
+    &:hover{
+      &:before{
+        border: solid 2px #000;
+      }
+    }
+    &:before{
+      -moz-transition: 0.3s;
+      -o-transition: 0.3s;
+      -webkit-transition: 0.3s;
+      transition: 0.3s;
+      display: block;
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: -20px;
+      width: 10px;
+      height: 10px;
+      border: solid 2px #888;
+    }
+    &:after{
+      -moz-transition: 0.3s;
+        -o-transition: 0.3s;
+        -webkit-transition: 0.3s;
+        transition: 0.3s;
+        display: block;
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -15px;
+        width: 6px;
+        height: 12px;
+        border-right: 2px solid #ff0000;
+        border-bottom: 2px solid #ff0000;
+        opacity: 0;
+        -moz-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+        transform: rotate(45deg);
+    }
+  }
+
+</style>
+
+<style lang="scss">
+  .year:hover { border: 1px solid #fafafa; }
+  .vdp-datepicker__calendar .cell.selected, .vdp-datepicker__calendar .cell.selected:hover, .vdp-datepicker__calendar .cell.selected.highlighted, .vdp-datepicker__calendar header .prev:not(.disabled):hover, .vdp-datepicker__calendar header .next:not(.disabled):hover, .vdp-datepicker__calendar header .up:not(.disabled):hover { background: #fafafa; }
+  .vdp-datepicker__calendar .cell:not(.blank):not(.disabled).day:hover, .vdp-datepicker__calendar .cell:not(.blank):not(.disabled).month:hover, .vdp-datepicker__calendar .cell:not(.blank):not(.disabled).year:hover { border: 1px solid #ccc; }
+  input {
+    @include font-size(14);
+    font-family: $gothic;
+    outline: none;
+    width: 100%;
+    padding: 10px;
+    border: solid 1px #ccc;
+    &:disabled {
+      background-color: #eee;
     }
   }
 </style>

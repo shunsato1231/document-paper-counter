@@ -8,6 +8,7 @@ import List from '@/pages/list'
 Vue.use(Router)
 
 export default new Router({
+  mode: 'history',
   routes: [
     {
       path: '/',
@@ -15,8 +16,18 @@ export default new Router({
       component: Input
     },
     {
+      path: '/input/:id',
+      name: 'reinput',
+      component: Input
+    },
+    {
       path: '/result',
       name: 'result',
+      component: Result
+    },
+    {
+      path: '/result/:id',
+      name: 'result-update',
       component: Result
     },
     {

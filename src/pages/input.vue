@@ -40,8 +40,15 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import * as Enum from '@/lib/enum'
+
 export default {
   name: 'Input',
+  data () {
+    return {
+      mode: ''
+    }
+  },
   computed: {
     script: {
       get () {
@@ -56,19 +63,28 @@ export default {
   watch: {
     options: {
       handler: function () {
-        this.$store.commit('counter/setOptions', this.options)
+        this.$store.commit('counter/setOptions', { options:this.options, mode:this.mode })
       },
       deep: true
     }
   },
   methods: {
     toResult () {
-      this.$store.commit('counter/setOptions', this.options)
+      this.$store.commit('counter/setOptions', { options:this.options, mode:this.mode })
       this.$router.push({name: 'result'})
     }
   },
   beforeCreate () {
-    this.$store.dispatch('counter/doLoadOptions')
+    if( !this.$route.params.id ) {
+      this.$store.dispatch('counter/doLoadOptions')
+    }
+  },
+  created () {
+    if( !this.$route.params.id ) {
+      this.mode = Enum.MODE.NEW
+    } else {
+      this.mode = Enum.MODE.UPDATE
+    }
   }
 }
 </script>
@@ -217,6 +233,7 @@ textarea{
   width: 40px;
   height: 30px;
   border: none;
+  padding: 0;
   @include font-size(20);
   font-weight: bold;
   text-align: center;

@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import Firebase from './../../api/firebase'
 
 export default {
@@ -30,11 +31,11 @@ export default {
       commit('onAuthStateChanged', { user })
     },
 
-    login ({ commit }) {
+    login () {
       Firebase.login()
     },
 
-    logout ({ commit }) {
+    logout () {
       Firebase.logout()
     }
   }

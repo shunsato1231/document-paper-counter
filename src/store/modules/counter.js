@@ -1,38 +1,55 @@
+import Firebase from '@/api/firebase'
+import * as Enum from '@/lib/enum'
+import moment from 'moment'
+
 export default{
   namespaced: true,
   state: {
-    script: '',
-    countedScript: {},
-    options: {
-      verticalLength: 20,
-      horizontalLength: 20,
-      direction: 'h',
-      indent: false,
-      number: false,
-      alphabet: false,
-      comma: false,
-      lowerCase: false,
-      bracket: false,
-      noStartBracket: false
-    }
+    document: {
+      script: '',
+      options: {
+        verticalLength: 20,
+        horizontalLength: 20,
+        direction: 'h',
+        indent: false,
+        number: false,
+        alphabet: false,
+        comma: false,
+        lowerCase: false,
+        bracket: false,
+        noStartBracket: false
+      },
+      title: '',
+      created_at: '',
+      updated_at: '',
+      deadline: '',
+      notification: false
+    },
+    countedScript: {}
   },
   getters: {
-    script: state => state.script,
-    options: state => state.options,
+    script: state => state.document.script,
+    options: state => state.document.options,
     countedScript: state => state.countedScript,
-    direction: state => state.options.direction,
-    verticalLength: state => state.options.direction === 'v' ? state.countedScript[0].length : state.countedScript.length,
-    horizontalLength: state => state.options.direction === 'v' ? state.countedScript.length : state.countedScript[0].length
+    direction: state => state.document.options.direction,
+    verticalLength: state => state.document.options.direction === 'v' ? state.countedScript[0].length : state.countedScript.length,
+    horizontalLength: state => state.document.options.direction === 'v' ? state.countedScript.length : state.countedScript[0].length,
+    title: state => state.document.title,
+    deadline: state => state.document.deadline,
+    notification: state => state.document.notification
   },
   mutations: {
-    setOptions (state, options) {
-      // localStorageにoptionsの値をセット
-      localStorage.setItem('options', JSON.stringify(state.options))
+    setOptions (state, { options, mode }) {
+      if (mode === Enum.MODE.NEW) {
+        // localStorageにoptionsの値をセット
+        localStorage.setItem('options', JSON.stringify(options))
+      }
+
       // state置き換え
-      state.options = options
+      state.document.options = options
     },
     setScript (state, script) {
-      state.script = script
+      state.document.script = script
     },
     setCountedScript (state, script) {
       state.countedScript = script
@@ -42,9 +59,38 @@ export default{
         // LocalStorageから取得したJson文字列をパース
         const options = JSON.parse(localStorage.getItem('options'))
         // state置き換え
-        state.options = options
+        state.document.options = options
       }
-    }
+    },
+    setTitle (state, title) {
+      state.document.title = title
+    },
+    setNotification (state, notification) {
+      state.document.notification = notification
+    },
+    setDeadline (state, deadline) {
+      state.document.deadline = parseInt(moment(deadline).format('x'))
+    },
+    setCreatedAt (state) {
+      const now = parseInt(moment().format('x'))
+      state.document.created_at = now
+    },
+    setUpdatedAt (state) {
+      const now = parseInt(moment().format('x'))
+      state.document.updated_at = now
+    },
+    setDocument (state, document) {
+      state.document = document
+    },
+    clearDocument (state) {
+      state.document.script = ''
+      state.document.title = '',
+      state.document.created_at = '',
+      state.document.updated_at = '',
+      state.document.deadline = '',
+      state.document.notification = false
+      state.countedScript = ''
+    },
   },
   actions: {
     doLoadOptions ({commit}) {
@@ -54,26 +100,26 @@ export default{
       let countedScript = []
 
       const line = (() => {
-        switch (state.options.direction) {
-          case 'v': return state.options.horizontalLength
-          case 'h': return state.options.verticalLength
+        switch (state.document.options.direction) {
+          case 'v': return state.document.options.horizontalLength
+          case 'h': return state.document.options.verticalLength
           default : return 0
         }
       })()
 
       const row = (() => {
-        switch (state.options.direction) {
-          case 'v': return state.options.verticalLength
-          case 'h': return state.options.horizontalLength
+        switch (state.document.options.direction) {
+          case 'v': return state.document.options.verticalLength
+          case 'h': return state.document.options.horizontalLength
           default : return 0
         }
       })()
 
       const regexEnd2char = (() => {
         let strCombRegex = ''
-        if (state.options.comma) strCombRegex += '、。，．,.'
-        if (state.options.lowerCase) strCombRegex += 'ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮ'
-        if (state.options.noStartBracket) strCombRegex += '】)）」\\]'
+        if (state.document.options.comma) strCombRegex += '、。，．,.'
+        if (state.document.options.lowerCase) strCombRegex += 'ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮ'
+        if (state.document.options.noStartBracket) strCombRegex += '】)）」\\]'
 
         if (strCombRegex === '') return null
         return new RegExp('[' + strCombRegex + ']')
@@ -81,9 +127,9 @@ export default{
 
       const regex2char = (() => {
         let strCombRegex = ''
-        if (state.options.bracket) strCombRegex += '【】（）()「」[\\]'
-        if (state.options.number) strCombRegex += '0-9'
-        if (state.options.alphabet) strCombRegex += 'a-zA-Z'
+        if (state.document.options.bracket) strCombRegex += '【】（）()「」[\\]'
+        if (state.document.options.number) strCombRegex += '0-9'
+        if (state.document.options.alphabet) strCombRegex += 'a-zA-Z'
 
         if (strCombRegex === '') return null
         return new RegExp('[' + strCombRegex + ']')
@@ -93,10 +139,10 @@ export default{
       const regexBracket = new RegExp(/[【（([「[]/)
       const regexClosingBracket = new RegExp(/[】)）\]」]/)
 
-      let textArray = [...state.script]
+      let textArray = [...state.document.script]
       let count = 0
       let indentFlag = false
-      while (true) {
+      for (;;) {
         const excess = (() => {
           if (count > line - 1) {
             return true
@@ -114,7 +160,7 @@ export default{
           let pushString = textArray[index]
           let pushFlag = true
 
-          if ((state.options.indent && textIndex === 0) && (indentFlag || count === 0)) {
+          if ((state.document.options.indent && textIndex === 0) && (indentFlag || count === 0)) {
             rowArray.push({text: '', excess: excess})
           }
           // 範囲を超えない
@@ -150,7 +196,7 @@ export default{
 
             // 文頭禁止文字をチェックした最後の行に追加する
             let lastStringIndex = index + 1
-            while (true) {
+            for (;;) {
               if (regexEnd2char != null && regexEnd2char.test(textArray[lastStringIndex])) {
                 lastString += textArray[lastStringIndex]
                 ++diff
@@ -180,6 +226,26 @@ export default{
         }
       }
       commit('setCountedScript', countedScript)
+    },
+    getDocument ({ commit, state }, id) {
+      return new Promise((resolve, reject) => {
+        Firebase.getDocument(id)
+          .then(doc => {
+            commit('setDocument', doc)
+            resolve(state.document.title)
+          }).catch(reject)
+      })
+    },
+    saveDocument({ commit, state }) {
+      return new Promise((resolve, reject) => {
+        commit('setCreatedAt')
+        commit('setUpdatedAt')
+        Firebase.saveDocument(state.document)
+          .then(() => {
+            resolve(state.document.title)
+            commit('clearDocument')
+          }).catch(reject)
+      })
     }
   }
 }
