@@ -1,5 +1,4 @@
 import Firebase from '@/api/firebase'
-import * as Enum from '@/lib/enum'
 import moment from 'moment'
 
 export default{
@@ -39,14 +38,13 @@ export default{
     notification: state => state.document.notification
   },
   mutations: {
-    setOptions (state, { options, mode }) {
-      if (mode === Enum.MODE.NEW) {
-        // localStorageにoptionsの値をセット
-        localStorage.setItem('options', JSON.stringify(options))
-      }
-
+    setOptions (state, options) {
       // state置き換え
       state.document.options = options
+    },
+    setOptionsLocalStorage (state, options) {
+      // localStorageにoptionsの値をセット
+      localStorage.setItem('options', JSON.stringify(options))
     },
     setScript (state, script) {
       state.document.script = script
@@ -228,6 +226,7 @@ export default{
       commit('setCountedScript', countedScript)
     },
     getDocument ({ commit, state }, id) {
+      commit('clearDocument')
       return new Promise((resolve, reject) => {
         Firebase.getDocument(id)
           .then(doc => {
@@ -241,6 +240,16 @@ export default{
         commit('setCreatedAt')
         commit('setUpdatedAt')
         Firebase.saveDocument(state.document)
+          .then(() => {
+            resolve(state.document.title)
+            commit('clearDocument')
+          }).catch(reject)
+      })
+    },
+    updateDocument({ commit, state }, id) {
+      return new Promise((resolve, reject) => {
+        commit('setUpdatedAt')
+        Firebase.updateDocument(state.document, id)
           .then(() => {
             resolve(state.document.title)
             commit('clearDocument')

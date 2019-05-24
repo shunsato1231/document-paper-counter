@@ -76,11 +76,8 @@ export default {
     return new Promise((resolve, reject) => {
       const uid = VueCookies.get('userInfo').uid
       database.collection('users').doc(uid).collection('documents').doc(id).get()
-        .then((querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            _documents[doc.id] = doc.data()
-          })
-          resolve(Object.assign({}, _documents))
+        .then((snapshot) => {
+          resolve(Object.assign({}, snapshot.data()))
         }).catch(reject)
     })
   },
@@ -89,6 +86,16 @@ export default {
       const uid = VueCookies.get('userInfo').uid
       database.collection('users').doc(uid).collection('documents')
         .add(document)
+        .then((ref) =>  {
+          resolve(ref)
+        }).catch(reject)
+    })
+  },
+  updateDocument (document, id) {
+    return new Promise((resolve, reject) => {
+      const uid = VueCookies.get('userInfo').uid
+      database.collection('users').doc(uid).collection('documents').doc(id)
+        .set(document)
         .then((ref) =>  {
           resolve(ref)
         }).catch(reject)

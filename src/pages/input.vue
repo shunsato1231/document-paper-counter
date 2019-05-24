@@ -40,7 +40,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import * as Enum from '@/lib/enum'
 
 export default {
   name: 'Input',
@@ -63,27 +62,26 @@ export default {
   watch: {
     options: {
       handler: function () {
-        this.$store.commit('counter/setOptions', { options:this.options, mode:this.mode })
+        if( !this.$route.meta.update ) {
+          this.$store.commit('counter/setOptionsLocalStorage', this.options)
+        }
+        this.$store.commit('counter/setOptions', this.options)
       },
       deep: true
     }
   },
   methods: {
     toResult () {
-      this.$store.commit('counter/setOptions', { options:this.options, mode:this.mode })
-      this.$router.push({name: 'result'})
+      if(this.$route.meta.update) {
+        this.$router.push ({name: 'result-update', params: {id: this.$route.params.id}})
+      } else {
+        this.$router.push({name: 'result'})
+      }
     }
   },
   beforeCreate () {
-    if( !this.$route.params.id ) {
+    if( !this.$route.meta.update ) {
       this.$store.dispatch('counter/doLoadOptions')
-    }
-  },
-  created () {
-    if( !this.$route.params.id ) {
-      this.mode = Enum.MODE.NEW
-    } else {
-      this.mode = Enum.MODE.UPDATE
     }
   }
 }

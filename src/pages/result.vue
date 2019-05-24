@@ -73,7 +73,9 @@ export default {
     }
   },
   beforeCreate () {
-    this.$store.dispatch('counter/countManuscriptText')
+    if( !this.$route.meta.update ) {
+      this.$store.dispatch('counter/countManuscriptText')
+    }
   },
   created () {
     this.scriptWidht = this.horizontalLength * this.squareSize + 1
@@ -91,14 +93,27 @@ export default {
       }
     },
     save () {
-      this.$store.dispatch('counter/saveDocument')
-        .then(title => {
-          console.log(title + 'を保存しました')
-          this.$store.dispatch('list/getList')
-        })
+      if(this.$route.meta.update) {
+        this.$store.dispatch('counter/updateDocument', this.$route.params.id)
+          .then(title => {
+            console.log(title + 'を上書きしました')
+            this.$store.dispatch('list/getList')
+          })
+      } else {
+        this.$store.dispatch('counter/saveDocument')
+          .then(title => {
+            console.log(title + 'を保存しました')
+            this.$store.dispatch('list/getList')
+          })
+      }
     },
     reinput () {
-      this.$router.push({name: 'input'})
+      if(this.$route.meta.update) {
+        this.$router.push ({name: 'reinput', params: {id: this.$route.params.id}})
+      } else {
+        this.$router.push({name: 'input'})
+      }
+
     }
   }
 }
