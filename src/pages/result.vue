@@ -96,13 +96,15 @@ export default {
       if(this.$route.meta.update) {
         this.$store.dispatch('counter/updateDocument', this.$route.params.id)
           .then(title => {
-            console.log(title + 'を上書きしました')
+            this.$router.push({name: 'list'})
+            this.$toasted.show(title + 'を上書きしました', {duration : 1500})
             this.$store.dispatch('list/getList')
           })
       } else {
         this.$store.dispatch('counter/saveDocument')
           .then(title => {
-            console.log(title + 'を保存しました')
+            this.$router.push({name: 'list'})
+            this.$toasted.show(title + 'を保存しました', {duration : 1500})
             this.$store.dispatch('list/getList')
           })
       }

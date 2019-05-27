@@ -4,13 +4,14 @@
       option(v-for="option in sortOptions" v-bind:value="option.value") {{ option.text }}
     div(@click="order = 'desc' ? 'asc' : 'desc' ") {{order}}
     template(v-for="document in orderdDocuments")
-      router-link(:to = "{name: 'result-update', params: {id: document.key}}", exact)
-        article
+      article
+        router-link(:to = "{name: 'result-update', params: {id: document.key}}", exact)
           h1 {{document.title}}
           footer
             span.date 作成日時：{{document.created_at | formatDate}}
             span.date 編集日時：{{document.updated_at | formatDate}}
             span.deadline(v-if="document.deadline") 締め切り：{{document.deadline | formatDate}}
+
 </template>
 
 <script>
@@ -50,6 +51,7 @@ export default {
 
 <style lang="scss" scoped>
   article {
+    position: relative;
     transition-duration: 500ms;
     padding: 5px 0;
     border-bottom: solid #e0e0d7 1px;

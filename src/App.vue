@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import HeadMenu from './components/head-menu.vue'
+import HeadMenu from '@/components/head-menu.vue'
 
 export default {
   name: 'App',

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueCookies from 'vue-cookies'
+import Toasted from 'vue-toasted'
 import App from './App.vue'
 import router from './router'
 import store from './store'
@@ -12,6 +13,7 @@ Vue.config.productionTip = false
 Firebase.initFirebase()
 
 Vue.use(VueCookies)
+Vue.use(Toasted)
 
 // set default config
 VueCookies.config('7d')
