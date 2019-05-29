@@ -9,9 +9,9 @@
         router-link(:to = "{name: 'result-update', params: {id: document.key}}", exact)
           h1 {{document.title}}
           footer
-            span.date 作成日時：{{document.created_at | formatDate}}
-            span.date 編集日時：{{document.updated_at | formatDate}}
-            span.deadline(v-if="document.deadline") 締め切り：{{document.deadline | formatDate}}
+            span.date 作成日：{{document.created_at | formatDate}}
+            span.date 編集日：{{document.updated_at | formatDate}}
+            span.deadline(v-if="document.deadline") 締切日：{{document.deadline | formatDate}}
         .delete
           button(@click="clickDocument(document);doDelete();")
 </template>
@@ -173,6 +173,9 @@ export default {
     height: 12px;
     border-bottom: 2px solid #9b9b90;
     border-left: 2px solid #9b9b90;
+    &:hover {
+      cursor: pointer;
+    }
   }
 
   .desc {
@@ -205,4 +208,9 @@ export default {
       display: none;
   }
 
+  @include small{
+    span{
+      display: block;
+    }
+  }
 </style>
