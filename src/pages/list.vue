@@ -1,8 +1,9 @@
 <template lang="pug">
   main
-    select(v-model="selected")
-      option(v-for="option in sortOptions" v-bind:value="option.value") {{ option.text }}
-    div(@click="order = 'desc' ? 'asc' : 'desc' ") {{order}}
+    .sort
+      select(v-model="selected")
+          option(v-for="option in sortOptions" v-bind:value="option.value") {{ option.text }}
+      .order(@click="changeOeder" :class="order")
     template(v-for="document in orderdDocuments")
       article
         router-link(:to = "{name: 'result-update', params: {id: document.key}}", exact)
@@ -31,9 +32,9 @@ export default {
       sortOptions: [
         {text: '編集日順', value: 'updated_at'},
         {text: '作成日順', value: 'created_at'},
-        {text: '締め切り順', value: 'deadline'}
+        {text: '締切日順', value: 'deadline'}
       ],
-      order: 'as'
+      order: 'desc'
     }
   },
   computed: {
@@ -73,6 +74,13 @@ export default {
     },
     clickDocument(document) {
       this.document = document
+    },
+    changeOeder () {
+      if(this.order === 'asc') {
+        this.order = 'desc'
+      } else if (this.order === 'desc') {
+        this.order = 'asc'
+      }
     }
   }
 }
@@ -152,4 +160,49 @@ export default {
       }
     }
   }
+  .sort {
+    display: table;
+    margin-left: auto;
+    margin-right: 22px;
+    margin-bottom: 15px;
+  }
+
+  .order {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-bottom: 2px solid #9b9b90;
+    border-left: 2px solid #9b9b90;
+  }
+
+  .desc {
+    transform: rotateZ(-45deg) translateX(6px) translateY(2px);
+  }
+  .asc {
+    transform: rotateZ(135deg) translateY(-6px);
+  }
+
+  select {
+    cursor: pointer;
+    text-indent: 0.01px;
+    text-overflow: ellipsis;
+    border: none;
+    outline: none;
+    background: #fafafa;
+    background-image: none;
+    box-shadow: none;
+    -webkit-appearance: none;
+    appearance: none;
+    font-family: $gothic;
+    color: #444;
+    @include font-size(14);
+    font-weight: bold;
+    border-radius: 0;
+    padding: 4px 8px;
+    margin-right: 8px;
+  }
+  .selectWrapper select::-ms-expand {
+      display: none;
+  }
+
 </style>

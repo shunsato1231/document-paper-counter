@@ -82,6 +82,7 @@ export default {
   }
   .cancel {
     border: none;
+    background: none;
     margin-right: 15px;
   }
 
