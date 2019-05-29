@@ -264,7 +264,7 @@ input[type="number"] {
   background: transparent;
   @include font-size(16);
   font-weight: bold;
-  font-family: "ヒラギノ明朝 ProN W3","Hiragino Mincho ProN","ＭＳ Ｐ明朝","MS PMincho",serif;
+  font-family: $mintyo;
   &:hover{
     background-color: #444;
     color: #f2f2e9;

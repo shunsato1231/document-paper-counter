@@ -1,4 +1,5 @@
 import Firebase from './../../api/firebase'
+import _ from 'lodash'
 
 export default {
   namespaced: true,
@@ -16,6 +17,9 @@ export default {
     },
     clearList(state) {
       state.list = {}
+    },
+    deleteDocument(state, id) {
+      state.list = Object.assign({}, _.omit(state.list, id))
     }
   },
 
@@ -28,6 +32,12 @@ export default {
     },
     clearList({ commit }) {
       commit('clearList')
+    },
+    deleteDocument({ commit }, id) {
+      Firebase.deleteDocument(id)
+        .then(() => {
+          commit('deleteDocument', id)
+        })
     }
   }
 }

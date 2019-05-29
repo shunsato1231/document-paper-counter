@@ -11,12 +11,15 @@
             span.date 作成日時：{{document.created_at | formatDate}}
             span.date 編集日時：{{document.updated_at | formatDate}}
             span.deadline(v-if="document.deadline") 締め切り：{{document.deadline | formatDate}}
-
+        .delete
+          button(@click="clickDocument(document);doDelete();")
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import _ from 'lodash'
+import Dialog from '@/components/dialog.vue'
+import Vue from 'vue'
 
 export default {
   name: 'List',
@@ -35,6 +38,11 @@ export default {
   },
   computed: {
     ...mapGetters('list', ['list']),
+    data () {
+      return {
+        document: {}
+      }
+    },
     orderdDocuments () {
       return _
         .chain(this.list)
@@ -44,6 +52,27 @@ export default {
         })
         .orderBy(this.selected, this.order)
         .value()
+    }
+  },
+  methods: {
+    doDelete () {
+      let dialog = Vue.extend(Dialog)
+      let dialogInstance = new dialog({
+        propsData: {
+          text: this.document.title + 'を削除しますか'
+        }
+      }).$on('test', this.delete).$mount()
+
+       this.$el.appendChild(dialogInstance.$el)
+    },
+    delete () {
+      this.$store.dispatch('list/deleteDocument', this.document.key)
+        .then(() => {
+          this.$toasted.show(this.document.title + 'を削除しました', {duration : 1500})
+        })
+    },
+    clickDocument(document) {
+      this.document = document
     }
   }
 }
@@ -73,5 +102,54 @@ export default {
     margin-right: 10px;
     @include font-size(12);
     color: #888;
+  }
+
+  .delete {
+    position:absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 50px;
+
+    button{
+      background: none;
+      border: none;
+      outline: none;
+      position: relative;
+      height: 100%;
+      width: 100%;
+      &:before {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: block;
+        content: '';
+        width: 20px;
+        height: 2px;
+        background: #e0e0d7;
+        transform: translateX(-10px) rotate(-45deg);
+      }
+
+      &:after {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: block;
+        content: '';
+        width: 20px;
+        height: 2px;
+        background: #e0e0d7;
+        transform: translateX(-10px) rotate(45deg);
+      }
+
+      &:hover {
+        &:before {
+          background: #333;
+        }
+        &:after {
+          background: #333;
+        }
+      }
+    }
   }
 </style>

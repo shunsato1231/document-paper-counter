@@ -56,7 +56,7 @@ const router = new Router({
   ]
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeResolve((to, from, next) => {
   if (to.meta.update && !from.meta.update) {
     store.dispatch('counter/getDocument', to.params.id)
       .then(() =>{

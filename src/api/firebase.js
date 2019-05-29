@@ -100,5 +100,14 @@ export default {
           resolve(ref)
         }).catch(reject)
     })
+  },
+  deleteDocument (id) {
+    return new Promise((resolve, reject) => {
+      const uid = VueCookies.get('userInfo').uid
+      database.collection('users').doc(uid).collection('documents').doc(id).delete()
+        .then(() => {
+          resolve()
+        }).catch(reject)
+    })
   }
 }

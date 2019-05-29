@@ -68,7 +68,7 @@ header{
 h1{
   @include font-size(30);
   color: #000;
-  font-family: "ヒラギノ明朝 ProN W6","Hiragino Mincho ProN","ＭＳ Ｐ明朝","MS PMincho",serif;
+  font-family: $mintyo;
   a:hover{
     text-decoration: none;
   }
