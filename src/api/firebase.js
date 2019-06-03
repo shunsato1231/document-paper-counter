@@ -2,6 +2,7 @@ import VueCookies from 'vue-cookies'
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
+import 'firebase/messaging'
 import store from '@/store'
 
 
@@ -19,6 +20,8 @@ let config = {
 firebase.initializeApp(config)
 const auth = firebase.auth()
 const database = firebase.firestore()
+const messaging = firebase.messaging();
+
 
 // variable
 var _userInfo = {}
@@ -27,6 +30,20 @@ var _documents = []
 export default {
   initFirebase () {
     auth.onAuthStateChanged(this.onAuthStateChanged.bind(this))
+
+    messaging.usePublicVapidKey(process.env.VUE_APP_FIRE_BASE_publicVapidKey)
+
+    // 通知の受信許可
+    messaging.requestPermission().then(() => {
+      console.log('Notification permission granted.')
+
+      // トークン取得
+      messaging.getToken().then((token) => {
+        console.log(token)
+      })
+    }).catch((err) => {
+      console.log('Unable to get permission to notify.', err)
+    })
   },
 
   login () {
