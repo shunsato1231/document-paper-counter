@@ -32,18 +32,6 @@ export default {
     auth.onAuthStateChanged(this.onAuthStateChanged.bind(this))
 
     messaging.usePublicVapidKey(process.env.VUE_APP_FIRE_BASE_publicVapidKey)
-
-    // 通知の受信許可
-    messaging.requestPermission().then(() => {
-      console.log('Notification permission granted.')
-
-      // トークン取得
-      messaging.getToken().then((token) => {
-        console.log(token)
-      })
-    }).catch((err) => {
-      console.log('Unable to get permission to notify.', err)
-    })
   },
 
   login () {
@@ -54,7 +42,6 @@ export default {
   logout () {
     auth.signOut()
   },
-
   onAuthStateChanged (user) {
     if (user) {
       _userInfo = {
@@ -76,11 +63,69 @@ export default {
       store.dispatch('list/clearList')
     }
   },
+  permittionNotification () {
+    return new Promise((resolve, reject) => {
+      // 通知の受信許可
+      messaging.requestPermission().then(() => {
+        // トークン取得
+        messaging.getToken().then((token) => {
+          resolve(token)
+        })
+      }).catch(reject)
+    })
+  },
+  tokenDuplicationCheck (token) {
+    return new Promise((resolve, reject) => {
+      const userId = VueCookies.get('userInfo').uid
+      let tokens
+      let duplication = false
+      // トークン重複チェック
+      database.collection('users').doc(userId).get()
+        .then((doc) => {
+          tokens = doc.data().token
+          if(doc.data().token) duplication = tokens.some(val => val == token)
 
+          if(duplication) {
+            resolve()
+          } else {
+            if (tokens === undefined) {
+              tokens = [token]
+            } else {
+              tokens.push(token)
+            }
+            resolve(tokens)
+          }
+        }).catch(reject)
+    })
+  },
+  addToken (tokens) {
+    return new Promise((resolve, reject) => {
+      const userId = VueCookies.get('userInfo').uid
+      database.collection('users').doc(userId).set({
+        token: tokens
+      })
+        .then(() => {
+          resolve()
+        }).catch(reject)
+    })
+  },
+  registrationToken () {
+    return new Promise((resolve, reject) => {
+      this.permittionNotification()
+        .then(token => {
+          return this.tokenDuplicationCheck(token)
+        }).then(token => {
+          if(!token) resolve()
+          return this.addToken(token)
+        }).then(() => {
+          resolve()
+        }).catch(reject)
+    })
+  },
   getDocuments () {
     return new Promise((resolve, reject) => {
-      const uid = VueCookies.get('userInfo').uid
-      database.collection('users').doc(uid).collection('documents').get()
+      const userId = VueCookies.get('userInfo').uid
+      database.collection('users').doc(userId).collection('documents').get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
             _documents[doc.id] = doc.data()
@@ -91,8 +136,8 @@ export default {
   },
   getDocument (id) {
     return new Promise((resolve, reject) => {
-      const uid = VueCookies.get('userInfo').uid
-      database.collection('users').doc(uid).collection('documents').doc(id).get()
+      const userId = VueCookies.get('userInfo').uid
+      database.collection('users').doc(userId).collection('documents').doc(id).get()
         .then((snapshot) => {
           resolve(Object.assign({}, snapshot.data()))
         }).catch(reject)
@@ -100,8 +145,8 @@ export default {
   },
   saveDocument (document) {
     return new Promise((resolve, reject) => {
-      const uid = VueCookies.get('userInfo').uid
-      database.collection('users').doc(uid).collection('documents')
+      const userId = VueCookies.get('userInfo').uid
+      database.collection('users').doc(userId).collection('documents')
         .add(document)
         .then((ref) =>  {
           resolve(ref)
@@ -110,8 +155,8 @@ export default {
   },
   updateDocument (document, id) {
     return new Promise((resolve, reject) => {
-      const uid = VueCookies.get('userInfo').uid
-      database.collection('users').doc(uid).collection('documents').doc(id)
+      const userId = VueCookies.get('userInfo').uid
+      database.collection('users').doc(userId).collection('documents').doc(id)
         .set(document)
         .then((ref) =>  {
           resolve(ref)
@@ -120,8 +165,8 @@ export default {
   },
   deleteDocument (id) {
     return new Promise((resolve, reject) => {
-      const uid = VueCookies.get('userInfo').uid
-      database.collection('users').doc(uid).collection('documents').doc(id).delete()
+      const userId = VueCookies.get('userInfo').uid
+      database.collection('users').doc(userId).collection('documents').doc(id).delete()
         .then(() => {
           resolve()
         }).catch(reject)

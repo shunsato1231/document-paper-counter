@@ -11,7 +11,7 @@
           input(type="text" v-model='title' required='required')
         div
           p 通知設定
-          input#checkbox(type='checkbox', name='deadline_action' v-model='notification')
+          input#checkbox(type='checkbox', @change='deadlineAction' v-model='notification')
           label(for='checkbox') 締め切りを通知する
           datepicker(:value='deadline', v-model='deadline', :required='notification', :disabled='!notification')
       .buttonWrap
@@ -22,6 +22,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import Datepicker from 'vuejs-datepicker'
+import Firebase from '@/api/firebase'
 
 export default {
   name: 'Result',
@@ -115,7 +116,13 @@ export default {
       } else {
         this.$router.push({name: 'input'})
       }
-
+    },
+    deadlineAction () {
+      Firebase.registrationToken()
+      .catch(() => {
+        this.notification = false
+        this.$toasted.show('通知の設定時にエラーが発生しました。ブラウザの設定を確認してください。', {duration : 2000})
+      })
     }
   }
 }
