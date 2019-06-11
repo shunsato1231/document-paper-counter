@@ -1,10 +1,10 @@
 import VueCookies from 'vue-cookies'
+import axios from 'axios'
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
 import 'firebase/messaging'
 import store from '@/store'
-
 
 // initialize Firebase
 let config = {
@@ -30,7 +30,6 @@ var _documents = []
 export default {
   initFirebase () {
     auth.onAuthStateChanged(this.onAuthStateChanged.bind(this))
-
     messaging.usePublicVapidKey(process.env.VUE_APP_FIRE_BASE_publicVapidKey)
   },
 
@@ -42,6 +41,7 @@ export default {
   logout () {
     auth.signOut()
   },
+
   onAuthStateChanged (user) {
     if (user) {
       _userInfo = {
@@ -49,6 +49,7 @@ export default {
         uid: user.uid,
         name: user.displayName
       }
+      this.getNotinotificationKey()
       VueCookies.set('userInfo', _userInfo)
       store.dispatch('auth/onAuthStateChanged', Object.assign({}, _userInfo))
       store.dispatch('list/getList')
@@ -74,52 +75,73 @@ export default {
       }).catch(reject)
     })
   },
-  tokenDuplicationCheck (token) {
+  getNotinotificationKey () {
+    const userId = VueCookies.get('userInfo').uid
+    const url = process.env.VUE_APP_API_URL_BASE + "/fcm/notification?notification_key_name=" + userId
+    let headers = {
+      'Content-Type':'application/json',
+      'Authorization': 'key=' + process.env.VUE_APP_FIRE_BASE_serverKey,
+      'project_id': process.env.VUE_APP_FIRE_BASE_messagingSenderId
+    }
+    return new Promise((resolve, reject) => {
+      axios.get(url, {headers: headers, data: {}})
+        .then(res => {
+          console.log(res.data)
+          resolve(res.data)
+        }).catch(err => {
+          reject(err)
+        })
+    })
+  },
+  createTokenGroup (token) {
     return new Promise((resolve, reject) => {
       const userId = VueCookies.get('userInfo').uid
-      let tokens
-      let duplication = false
-      // トークン重複チェック
-      database.collection('users').doc(userId).get()
-        .then((doc) => {
-          tokens = doc.data().token
-          if(doc.data().token) duplication = tokens.some(val => val == token)
+      const url = process.env.VUE_APP_API_URL_BASE + "/fcm/notification"
 
-          if(duplication) {
-            resolve()
-          } else {
-            if (tokens === undefined) {
-              tokens = [token]
-            } else {
-              tokens.push(token)
-            }
-            resolve(tokens)
-          }
-        }).catch(reject)
+      let data = {
+        "operation": "create",
+        "notification_key_name": userId,
+        "registration_ids": [token]
+      }
+
+      let headers = {
+        'Authorization': 'key=' + process.env.VUE_APP_FIRE_BASE_serverKey,
+        'project_id': process.env.VUE_APP_FIRE_BASE_messagingSenderId
+      }
+
+      axios.post(url, data, {headers: headers, useCredentails: true})
+        .then(res => {
+          console.log(res.data)
+          resolve(res.data)
+        }).catch(err => {
+          reject(err)
+        })
     })
   },
-  addToken (tokens) {
+  addTokenGroup (token, key) {
     return new Promise((resolve, reject) => {
       const userId = VueCookies.get('userInfo').uid
-      database.collection('users').doc(userId).set({
-        token: tokens
-      })
-        .then(() => {
-          resolve()
-        }).catch(reject)
-    })
-  },
-  registrationToken () {
-    return new Promise((resolve, reject) => {
-      this.permittionNotification()
-        .then(token => {
-          return this.tokenDuplicationCheck(token)
-        }).then(token => {
-          if(!token) resolve()
-          return this.addToken(token)
-        }).then(() => {
-          resolve()
-        }).catch(reject)
+      const url = process.env.VUE_APP_API_URL_BASE + "/fcm/notification"
+
+      let data = {
+        "operation": "add",
+        "notification_key_name": userId,
+        "notification_key": key,
+        "registration_ids": [token]
+      }
+
+      let headers = {
+        'Authorization': 'key=' + process.env.VUE_APP_FIRE_BASE_serverKey,
+        'project_id': process.env.VUE_APP_FIRE_BASE_messagingSenderId
+      }
+
+      axios.post(url, data, {headers: headers, useCredentails: true})
+        .then(res => {
+          console.log(res.data)
+          resolve(res.data)
+        }).catch(err => {
+          reject(err)
+        })
     })
   },
   getDocuments () {
