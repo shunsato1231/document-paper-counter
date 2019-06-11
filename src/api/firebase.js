@@ -49,7 +49,6 @@ export default {
         uid: user.uid,
         name: user.displayName
       }
-      this.getNotinotificationKey()
       VueCookies.set('userInfo', _userInfo)
       store.dispatch('auth/onAuthStateChanged', Object.assign({}, _userInfo))
       store.dispatch('list/getList')
@@ -66,9 +65,7 @@ export default {
   },
   permittionNotification () {
     return new Promise((resolve, reject) => {
-      // 通知の受信許可
       messaging.requestPermission().then(() => {
-        // トークン取得
         messaging.getToken().then((token) => {
           resolve(token)
         })
@@ -86,7 +83,6 @@ export default {
     return new Promise((resolve, reject) => {
       axios.get(url, {headers: headers, data: {}})
         .then(res => {
-          console.log(res.data)
           resolve(res.data)
         }).catch(err => {
           reject(err)
@@ -111,36 +107,47 @@ export default {
 
       axios.post(url, data, {headers: headers, useCredentails: true})
         .then(res => {
-          console.log(res.data)
           resolve(res.data)
-        }).catch(err => {
-          reject(err)
-        })
+        }).catch(reject)
     })
   },
-  addTokenGroup (token, key) {
+  addTokenGroup (token) {
     return new Promise((resolve, reject) => {
       const userId = VueCookies.get('userInfo').uid
       const url = process.env.VUE_APP_API_URL_BASE + "/fcm/notification"
 
-      let data = {
-        "operation": "add",
-        "notification_key_name": userId,
-        "notification_key": key,
-        "registration_ids": [token]
-      }
-
-      let headers = {
-        'Authorization': 'key=' + process.env.VUE_APP_FIRE_BASE_serverKey,
-        'project_id': process.env.VUE_APP_FIRE_BASE_messagingSenderId
-      }
-
-      axios.post(url, data, {headers: headers, useCredentails: true})
+      this.getNotinotificationKey()
         .then(res => {
-          console.log(res.data)
+          let data = {
+            "operation": "add",
+            "notification_key_name": userId,
+            "notification_key": res.notification_key,
+            "registration_ids": [token]
+          }
+
+          let headers = {
+            'Authorization': 'key=' + process.env.VUE_APP_FIRE_BASE_serverKey,
+            'project_id': process.env.VUE_APP_FIRE_BASE_messagingSenderId
+          }
+
+          return axios.post(url, data, {headers: headers, useCredentails: true})
+        }).then(res => {
           resolve(res.data)
-        }).catch(err => {
-          reject(err)
+        }).catch(reject)
+    })
+  },
+  setNotinotificationKey (token) {
+    return new Promise((resolve, reject) => {
+      this.createTokenGroup(token)
+        .then(key => {
+          resolve(key)
+        })
+        .catch(() => {
+          this.addTokenGroup(token)
+            .then(key => {
+              resolve(key)
+            })
+            .catch(reject)
         })
     })
   },

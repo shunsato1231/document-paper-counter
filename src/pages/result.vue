@@ -4,25 +4,24 @@
       .script(:style='styles', :class="(direction === 'h') ? 'h' : 'v'")
         .line(v-for='line in countedScript', :class="(direction === 'h') ? 'h' : 'v'")
           .square(:style='styles', :class="{ excess: row.excess }", v-for='row in line' ) {{row.text}}
-    form.editor(@submit.prevent='save')
+    .editor
       .inputMeta
         div
           p タイトル
-          input(type="text" v-model='title' required='required')
+          input(type="text" v-model='title')
         div
           p 通知設定
-          input#checkbox(type='checkbox', @change='deadlineAction' v-model='notification')
+          input#checkbox(type='checkbox', @change='settingNotification' v-model='notification')
           label(for='checkbox') 締め切りを通知する
-          datepicker(:value='deadline', v-model='deadline', :required='notification', :disabled='!notification')
+          datepicker(:value='deadline', v-model='deadline', :disabled='!notification')
       .buttonWrap
-        button.reinput(type="button" @click="reinput") 入力し直す
-        button.save(type='submit') 保存する
+        button.reinput(@click="reinput") 入力し直す
+        button.save(@click='validation') 保存する
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import Datepicker from 'vuejs-datepicker'
-import Firebase from '@/api/firebase'
 
 export default {
   name: 'Result',
@@ -93,6 +92,26 @@ export default {
         script.scroll(this.scriptWidht, 0)
       }
     },
+    validation () {
+      let errorMessage = []
+
+      if (!this.title) {
+        errorMessage.push('タイトルを入力してください')
+      }
+
+      if (this.notification && !this.deadline) {
+        errorMessage.push('締切日を入力してください')
+      }
+
+      if (errorMessage.length === 0) {
+        this.save()
+      } else {
+        errorMessage.forEach((message) => {
+          this.$toasted.show(message, {duration : 1500})
+        })
+        return
+      }
+    },
     save () {
       if(this.$route.meta.update) {
         this.$store.dispatch('counter/updateDocument', this.$route.params.id)
@@ -117,12 +136,12 @@ export default {
         this.$router.push({name: 'input'})
       }
     },
-    deadlineAction () {
-      Firebase.registrationToken()
-      .catch(() => {
-        this.notification = false
-        this.$toasted.show('通知の設定時にエラーが発生しました。ブラウザの設定を確認してください。', {duration : 2000})
-      })
+    settingNotification () {
+      this.$store.dispatch('counter/getNotificationKey')
+        .catch(() => {
+          this.notification = false
+          this.$toasted.show('通知の設定時にエラーが発生しました。ブラウザの設定を確認してください。', {duration : 2000})
+        })
     }
   }
 }

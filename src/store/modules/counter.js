@@ -24,7 +24,8 @@ export default{
       deadline: '',
       notification: false
     },
-    countedScript: {}
+    countedScript: {},
+    notificationKey: ''
   },
   getters: {
     script: state => state.document.script,
@@ -89,6 +90,9 @@ export default{
       state.document.notification = false
       state.countedScript = ''
     },
+    setNotinotificationKey (state, key) {
+      state.notificationKey = key
+    }
   },
   actions: {
     doLoadOptions ({commit}) {
@@ -253,6 +257,16 @@ export default{
           .then(() => {
             resolve(state.document.title)
             commit('clearDocument')
+          }).catch(reject)
+      })
+    },
+    getNotificationKey({commit}) {
+      return new Promise((resolve, reject) => {
+        Firebase.permittionNotification()
+          .then(token => Firebase.setNotinotificationKey(token))
+          .then(key => {
+            resolve(key)
+            commit('setNotinotificationKey', key)
           }).catch(reject)
       })
     }
