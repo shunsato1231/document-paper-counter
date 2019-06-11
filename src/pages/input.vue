@@ -1,41 +1,40 @@
 <template lang="pug">
   main
-    form(@submit.prevent='toResult')
-      .setting-form
-        .direction-form
-          input#radio1(type='radio', name='direction', value='h' v-model="options.direction")
-          label(for='radio1') 横書き
-          input#radio2(type='radio', name='direction', value='v' v-model="options.direction")
-          label(for='radio2') 縦書き
-        input#checkbox1(type='checkbox', name='indent' v-model="options.indent")
-        label(for='checkbox1') 段落の頭を1マス開ける
-        input#checkbox2(type='checkbox', name='number' v-model="options.number")
-        label(for='checkbox2') 数字を1マスに2文字入れる
-        input#checkbox3(type='checkbox', name='alphabet' v-model="options.alphabet")
-        label(for='checkbox3') アルファベットを1マスに2文字入れる
-        input#checkbox4(type='checkbox', name='comma' v-model="options.comma")
-        label(for='checkbox4') 句読点（「。」や「、」）が行の頭に来ないようにする
-        input#checkbox5(type='checkbox', name='lowerCase' v-model="options.lowerCase")
-        label(for='checkbox5') 「っ」「ゃ」「ゅ」「ょ」が行の頭に来ないようにする
-        input#checkbox6(type='checkbox', name='bracket' v-model="options.bracket")
-        label(for='checkbox6') 括弧を他の文字と同じますに入れる
-        input#checkbox7(type='checkbox', name='noStartBracket' v-model="options.noStartBracket")
-        label(for='checkbox7') 閉じ括弧が行の頭に来ないようにする
-      .squaresForm
-        .verticalForm
-          .direction 縦：
-          div
-            .plus(@click='options.verticalLength++', :disabled='options.verticalLength>=100')
-            input.num(type='number', v-model='options.verticalLength', min='1', max='100')
-            .minas(@click='options.verticalLength--', :disabled='options.verticalLength<=1')
-        .horizontalForm
-          .direction 横：
-          div
-            .plus(@click='options.horizontalLength++', :disabled='options.horizontalLength>=100')
-            input.num(type='number', v-model='options.horizontalLength', min='1', max='100')
-            .minas(@click='options.horizontalLength--', :disabled='options.horizontalLength<=1')
-      textarea(v-model='script' required)
-      button.countButton(type='submit') カウントする
+    .setting-form
+      .direction-form
+        input#radio1(type='radio', name='direction', value='h' v-model="options.direction")
+        label(for='radio1') 横書き
+        input#radio2(type='radio', name='direction', value='v' v-model="options.direction")
+        label(for='radio2') 縦書き
+      input#checkbox1(type='checkbox', name='indent' v-model="options.indent")
+      label(for='checkbox1') 段落の頭を1マス開ける
+      input#checkbox2(type='checkbox', name='number' v-model="options.number")
+      label(for='checkbox2') 数字を1マスに2文字入れる
+      input#checkbox3(type='checkbox', name='alphabet' v-model="options.alphabet")
+      label(for='checkbox3') アルファベットを1マスに2文字入れる
+      input#checkbox4(type='checkbox', name='comma' v-model="options.comma")
+      label(for='checkbox4') 句読点（「。」や「、」）が行の頭に来ないようにする
+      input#checkbox5(type='checkbox', name='lowerCase' v-model="options.lowerCase")
+      label(for='checkbox5') 「っ」「ゃ」「ゅ」「ょ」が行の頭に来ないようにする
+      input#checkbox6(type='checkbox', name='bracket' v-model="options.bracket")
+      label(for='checkbox6') 括弧を他の文字と同じますに入れる
+      input#checkbox7(type='checkbox', name='noStartBracket' v-model="options.noStartBracket")
+      label(for='checkbox7') 閉じ括弧が行の頭に来ないようにする
+    .squaresForm
+      .verticalForm
+        .direction 縦：
+        div
+          .plus(@click='options.verticalLength++', :disabled='options.verticalLength>=100')
+          input.num(type='number', v-model='options.verticalLength', min='1', max='100')
+          .minas(@click='options.verticalLength--', :disabled='options.verticalLength<=1')
+      .horizontalForm
+        .direction 横：
+        div
+          .plus(@click='options.horizontalLength++', :disabled='options.horizontalLength>=100')
+          input.num(type='number', v-model='options.horizontalLength', min='1', max='100')
+          .minas(@click='options.horizontalLength--', :disabled='options.horizontalLength<=1')
+    textarea(v-model='script')
+    button.countButton(@click="validation") カウントする
 </template>
 
 <script>
@@ -71,6 +70,13 @@ export default {
     }
   },
   methods: {
+    validation () {
+      if(!this.script) {
+        this.$toasted.show('本文を入力してください', {duration : 1500})
+      } else {
+        this.toResult()
+      }
+    },
     toResult () {
       if(this.$route.meta.update) {
         this.$router.push ({name: 'result-update', params: {id: this.$route.params.id}})

@@ -109,7 +109,6 @@ export default {
         errorMessage.forEach((message) => {
           this.$toasted.show(message, {duration : 1500})
         })
-        return
       }
     },
     save () {
