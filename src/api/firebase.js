@@ -139,13 +139,13 @@ export default {
   setNotinotificationKey (token) {
     return new Promise((resolve, reject) => {
       this.createTokenGroup(token)
-        .then(key => {
-          resolve(key)
+        .then(res => {
+          resolve(res.notification_key)
         })
         .catch(() => {
           this.addTokenGroup(token)
-            .then(key => {
-              resolve(key)
+            .then(res => {
+              resolve(res.notification_key)
             })
             .catch(reject)
         })

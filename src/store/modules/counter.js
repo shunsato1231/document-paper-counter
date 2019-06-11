@@ -22,10 +22,10 @@ export default{
       created_at: '',
       updated_at: '',
       deadline: '',
-      notification: false
+      notification: false,
+      notificationKey: ''
     },
     countedScript: {},
-    notificationKey: ''
   },
   getters: {
     script: state => state.document.script,
@@ -91,7 +91,7 @@ export default{
       state.countedScript = ''
     },
     setNotinotificationKey (state, key) {
-      state.notificationKey = key
+      state.document.notificationKey = key
     }
   },
   actions: {
