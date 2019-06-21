@@ -43,15 +43,30 @@ export default {
   },
 
   onAuthStateChanged (user) {
+    this.test ()
     if (user) {
-      _userInfo = {
-        loggedIn: true,
-        uid: user.uid,
-        name: user.displayName
-      }
-      VueCookies.set('userInfo', _userInfo)
-      store.dispatch('auth/onAuthStateChanged', Object.assign({}, _userInfo))
-      store.dispatch('list/getList')
+      this.getUserName(user.uid)
+        .then(val => {
+          _userInfo = {
+            loggedIn: true,
+            uid: user.uid,
+            name: val,
+          }
+          VueCookies.set('userInfo', _userInfo)
+          store.dispatch('auth/onAuthStateChanged', Object.assign({}, _userInfo))
+          store.dispatch('list/getList')
+        })
+        .catch(() => {
+          _userInfo = {
+            loggedIn: true,
+            uid: user.uid,
+            name: user.displayName,
+          }
+          this.setUserName(user.displayName)
+          VueCookies.set('userInfo', _userInfo)
+          store.dispatch('auth/onAuthStateChanged', Object.assign({}, _userInfo))
+          store.dispatch('list/getList')
+        })
     } else {
       _userInfo = {
         loggedIn: false,
@@ -197,6 +212,38 @@ export default {
       const userId = VueCookies.get('userInfo').uid
       database.collection('users').doc(userId).collection('documents').doc(id).delete()
         .then(() => {
+          resolve()
+        }).catch(reject)
+    })
+  },
+  setUserName (name) {
+    return new Promise((resolve, reject) => {
+      database.collection('users').doc(_userInfo.uid)
+        .set({displayName: name})
+        .then((ref) =>  {
+          resolve(ref)
+        }).catch(reject)
+    })
+  },
+  getUserName(userId) {
+    return new Promise((resolve, reject) => {
+      database.collection('users').doc(userId).get()
+        .then((snapshot) => {
+          if(snapshot.exists){
+            resolve(snapshot.data().displayName)
+          } else {
+            reject()
+          }
+        }).catch(reject)
+    })
+  },
+  test () {
+    return new Promise((resolve, reject) => {
+      database.collection('users').get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach(doc => {
+            console.log(doc.id)
+          })
           resolve()
         }).catch(reject)
     })
