@@ -244,7 +244,13 @@ export default{
         commit('setCreatedAt')
         commit('setUpdatedAt')
         Firebase.saveDocument(state.document)
-          .then(() => {
+          .then((docRef) => {
+            if(state.document.notification) {
+              return Firebase.setNotificationList(state.document, docRef.id)
+            } else {
+              resolve(state.document.title)
+            }
+          }).then(() => {
             resolve(state.document.title)
             commit('clearDocument')
           }).catch(reject)
@@ -255,6 +261,12 @@ export default{
         commit('setUpdatedAt')
         Firebase.updateDocument(state.document, id)
           .then(() => {
+            if(state.document.notification) {
+              return Firebase.setNotificationList(state.document, id)
+            } else {
+              resolve(state.document.title)
+            }
+          }).then(() => {
             resolve(state.document.title)
             commit('clearDocument')
           }).catch(reject)

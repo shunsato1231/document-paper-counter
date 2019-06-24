@@ -43,7 +43,6 @@ export default {
   },
 
   onAuthStateChanged (user) {
-    this.test ()
     if (user) {
       this.getUserName(user.uid)
         .then(val => {
@@ -207,10 +206,27 @@ export default {
         }).catch(reject)
     })
   },
+  setNotificationList (document, id) {
+    return new Promise((resolve, reject) => {
+      database.collection('notificationList').doc(id)
+        .set(document)
+        .then((ref) =>  {
+          resolve(ref)
+        }).catch(reject)
+    })
+  },
   deleteDocument (id) {
     return new Promise((resolve, reject) => {
       const userId = VueCookies.get('userInfo').uid
       database.collection('users').doc(userId).collection('documents').doc(id).delete()
+        .then(() => {
+          resolve()
+        }).catch(reject)
+    })
+  },
+  deleteNotificationList (id) {
+    return new Promise((resolve, reject) => {
+      database.collection('notificationList').doc(id).delete()
         .then(() => {
           resolve()
         }).catch(reject)
@@ -234,17 +250,6 @@ export default {
           } else {
             reject()
           }
-        }).catch(reject)
-    })
-  },
-  test () {
-    return new Promise((resolve, reject) => {
-      database.collection('users').get()
-        .then((querySnapshot) => {
-          querySnapshot.forEach(doc => {
-            console.log(doc.id)
-          })
-          resolve()
         }).catch(reject)
     })
   }

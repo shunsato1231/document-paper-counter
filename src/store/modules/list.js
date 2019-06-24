@@ -36,6 +36,9 @@ export default {
     deleteDocument({ commit }, id) {
       Firebase.deleteDocument(id)
         .then(() => {
+          return Firebase.deleteNotificationList(id)
+        })
+        .then(() => {
           commit('deleteDocument', id)
         })
     }
