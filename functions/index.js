@@ -1,19 +1,18 @@
 const functions = require(`firebase-functions`);
 const admin = require(`firebase-admin`);
 const moment = require("moment");
+const axios = require("axios");
 
 
 admin.initializeApp(functions.config().firebase)
 const database = admin.firestore()
-// database.settings({
-//   timestampsInSnapshots: true
-// });
+const messaging = admin.messaging()
 
-function getNotification () {
+function getNotificationDocument () {
   return new Promise((resolve, reject) => {
     database.collection('notificationList').get()
       .then((querySnapshot) => {
-          let notification = querySnapshot.docs.filter(doc => {
+          let today = querySnapshot.docs.filter(doc => {
             return moment().isSame(doc.data().deadline, 'day')
           }).map(doc => {
             return {
@@ -22,7 +21,7 @@ function getNotification () {
             }
           })
 
-          let beforeNotification = querySnapshot.docs.filter(doc => {
+          let tomorrow = querySnapshot.docs.filter(doc => {
             return moment().add(1, 'days').isSame(doc.data().deadline, 'day')
           }).map(doc => {
             return {
@@ -30,70 +29,98 @@ function getNotification () {
               id: doc.id
             }
           })
-        return resolve({notification: notification, beforeNotification: beforeNotification})
+
+          let over = querySnapshot.docs.filter(doc => {
+            return moment().subtract(1, 'days').isSameOrAfter(doc.data().deadline, 'day')
+          }).map(doc => {
+            return {
+              data: doc.data(),
+              id: doc.id
+            }
+          })
+
+        return resolve({today: today, tomorrow: tomorrow, over: over})
       }).catch(reject)
   })
 }
 
-function deleteNotificationList (id) {
+function pushNotificationTodaysDeadlineDocument(documents) {
   return new Promise((resolve, reject) => {
-    database.collection('notificationList').doc(id).delete()
-      .then(() => {
-        return resolve()
-      }).catch(reject)
+    let response = []
+    const url = "https://fcm.googleapis.com/fcm/send"
+    documents.forEach(document => {
+      let headers = {
+        'Authorization': 'key=' + functions.config().vue_app.server_key,
+      }
+
+      let data = {
+        "notification": {
+          "title": "「" + document.data.title + "」は今日締め切りです",
+          "click_action": "result/" + document.id
+        },
+        "to": document.data.notificationKey
+      }
+
+      axios.post(url, data, {headers: headers, useCredentails: true})
+        .then(res => {
+        response.push(res.data)
+        return null
+        }).catch(reject)
+    })
+    resolve(response)
   })
 }
 
-function addNotification (documents) {
+function pushNotificationTomorrowDeadlineDocument(documents) {
+  return new Promise((resolve, reject) => {
+    let response = []
+    const url = "https://fcm.googleapis.com/fcm/send"
+    documents.forEach(document => {
+      let headers = {
+        'Authorization': 'key=' + functions.config().vue_app.server_key,
+      }
+
+      let data = {
+        "notification": {
+          "title": "「" + document.data.title + "」は明日締め切りです",
+          "click_action": "result/" + document.id
+        },
+        "to": document.data.notificationKey
+      }
+
+      axios.post(url, data, {headers: headers, useCredentails: true})
+        .then(res => {
+        response.push(res.data)
+        return null
+        }).catch(reject)
+    })
+    resolve(response)
+  })
+}
+
+function deleteOverDeadlineDocument(documents) {
   return new Promise((resolve, reject) => {
     documents.forEach(document => {
-      database.collection('notification').doc(document.id)
-        .set(document.data)
+      database.collection('notificationList').doc(document.id).delete()
         .then(() => {
-          return deleteNotificationList(document.id)
+          return null
         }).catch(reject)
     })
     resolve()
   })
 }
 
-function addBeforeNotification (documents) {
-  return new Promise((resolve, reject) => {
-    documents.forEach(document => {
-      database.collection('beforeNotification').doc(document.id)
-        .set(document.data)
-        .catch(reject)
-    })
-    resolve()
-  })
-}
 
-function deleteNotification (id) {
-  return new Promise((resolve, reject) => {
-    database.collection('notification').doc(id).delete()
-      .then(() => {
-        return resolve()
-      }).catch(reject)
-  })
-}
-
-function deleteBeforeNotification (id) {
-  return new Promise((resolve, reject) => {
-    database.collection('beforeNotification').doc(id).delete()
-      .then(() => {
-        return resolve()
-      }).catch(reject)
-  })
-}
-
-//通知用のテーブルに通知するdocumentを追加
-exports.addNotificationToDatabase = functions.https.onRequest((request, response) => {
-  getNotification().then(res => {
-    addNotification(res.notification)
-    addBeforeNotification(res.beforeNotification)
+//通知処理
+exports.pushNotification = functions.https.onRequest((request, response) => {
+  getNotificationDocument().then(res => {
+    return Promise.all([pushNotificationTodaysDeadlineDocument(res.today),
+                        pushNotificationTomorrowDeadlineDocument(res.tomorrow),
+                        deleteOverDeadlineDocument(res.over)])
+  }).then(res => {
     response.send(res)
     return null
-  }).catch(() => {
-    response.send('error!')
+  }).catch(err => {
+    response.send('err:' + err)
   })
 })
