@@ -16,7 +16,8 @@ function getNotificationDocument () {
             return moment().isSame(doc.data().deadline, 'day')
           }).map(doc => {
             return {
-              data: doc.data(),
+              notificationKey: doc.data().notificationKey,
+              title: doc.data().title,
               id: doc.id
             }
           })
@@ -25,7 +26,8 @@ function getNotificationDocument () {
             return moment().add(1, 'days').isSame(doc.data().deadline, 'day')
           }).map(doc => {
             return {
-              data: doc.data(),
+              notificationKey: doc.data().notificationKey,
+              title: doc.data().title,
               id: doc.id
             }
           })
@@ -34,7 +36,8 @@ function getNotificationDocument () {
             return moment().subtract(1, 'days').isSameOrAfter(doc.data().deadline, 'day')
           }).map(doc => {
             return {
-              data: doc.data(),
+              notificationKey: doc.data().notificationKey,
+              title: doc.data().title,
               id: doc.id
             }
           })
@@ -46,7 +49,6 @@ function getNotificationDocument () {
 
 function pushNotificationTodaysDeadlineDocument(documents) {
   return new Promise((resolve, reject) => {
-    let response = []
     const url = "https://fcm.googleapis.com/fcm/send"
     documents.forEach(document => {
       let headers = {
@@ -55,19 +57,16 @@ function pushNotificationTodaysDeadlineDocument(documents) {
 
       let data = {
         "notification": {
-          "title": "「" + document.data.title + "」は今日締め切りです",
+          "title": "「" + document.title + "」は今日締め切りです",
           "click_action": "result/" + document.id
         },
-        "to": document.data.notificationKey
+        "to": document.notificationKey
       }
 
       axios.post(url, data, {headers: headers, useCredentails: true})
-        .then(res => {
-        response.push(res.data)
-        return null
-        }).catch(reject)
+        .catch(reject)
     })
-    resolve(response)
+    resolve({'pushed today deadline document' : documents})
   })
 }
 
@@ -82,19 +81,16 @@ function pushNotificationTomorrowDeadlineDocument(documents) {
 
       let data = {
         "notification": {
-          "title": "「" + document.data.title + "」は明日締め切りです",
+          "title": "「" + document.title + "」は明日締め切りです",
           "click_action": "result/" + document.id
         },
-        "to": document.data.notificationKey
+        "to": document.notificationKey
       }
 
       axios.post(url, data, {headers: headers, useCredentails: true})
-        .then(res => {
-        response.push(res.data)
-        return null
-        }).catch(reject)
+        .catch(reject)
     })
-    resolve(response)
+    resolve({'pushed tommorow deadline document' : documents})
   })
 }
 
@@ -102,11 +98,9 @@ function deleteOverDeadlineDocument(documents) {
   return new Promise((resolve, reject) => {
     documents.forEach(document => {
       database.collection('notificationList').doc(document.id).delete()
-        .then(() => {
-          return null
-        }).catch(reject)
+        .catch(reject)
     })
-    resolve()
+    resolve({'deleted document': documents})
   })
 }
 
@@ -118,9 +112,8 @@ exports.pushNotification = functions.https.onRequest((request, response) => {
                         pushNotificationTomorrowDeadlineDocument(res.tomorrow),
                         deleteOverDeadlineDocument(res.over)])
   }).then(res => {
-    response.send(res)
-    return null
+    return response.send(res)
   }).catch(err => {
-    response.send('err:' + err)
+    response.send(err)
   })
 })
