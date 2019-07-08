@@ -5,7 +5,7 @@
         .line(v-for='line in countedScript', :class="(direction === 'h') ? 'h' : 'v'")
           .square(:style='styles', :class="{ excess: row.excess }", v-for='row in line' ) {{row.text}}
     .editor
-      .inputMeta
+      .inputMeta(v-if="stateLoggedIn")
         div
           p タイトル
           input(type="text" v-model='title')
@@ -16,7 +16,7 @@
           datepicker(:value='deadline', v-model='deadline', :disabled='!notification')
       .buttonWrap
         button.reinput(@click="reinput") 入力し直す
-        button.save(@click='validation') 保存する
+        button.save(@click='validation' v-if="stateLoggedIn") 保存する
 </template>
 
 <script>
