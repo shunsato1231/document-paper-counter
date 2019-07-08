@@ -1,5 +1,10 @@
 <template lang="pug">
-  h1 このアプリについて
+  section
+    h1 このアプリについて
+    ul
+      li 入力した文章が原稿用紙に収まるかどうかを、実際にマス目に納めてカウントします。
+      li ログインするとカウントした結果を保存することができます。
+      li 締切日を設定すると締め切り前日と当日に通知が届きます。
 </template>
 
 <script>
@@ -14,6 +19,22 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+  section {
+    padding: 20px 5%;
+  }
 
+  h1 {
+    @include font-size(18);
+    font-weight: bold;
+  }
+
+  ul {
+    margin: 10px 5px;
+    li {
+      @include font-size(14);
+      line-height: 2;
+      list-style: disc inside;
+    }
+  }
 </style>

@@ -1,3 +1,4 @@
+import VueCookies from 'vue-cookies'
 import Vue from 'vue'
 import Router from 'vue-router'
 import store from '@/store'
@@ -57,20 +58,20 @@ const router = new Router({
 })
 
 router.beforeResolve((to, from, next) => {
-  if (to.meta.update && !from.meta.update) {
+  let loggedIn = VueCookies.isKey('userInfo')
+
+  if(to.meta.requireAuth && !loggedIn) {
+    next({name: 'input'})
+  } else if (to.meta.update && !from.meta.update) {
     store.dispatch('counter/getDocument', to.params.id)
       .then(() =>{
         store.dispatch('counter/countManuscriptText')
         next()
+      }).catch(() => {
+        next({name: 'input'})
       })
   } else if(to.name === 'result'){
     if (from.name !== 'input') {
-      next({name: 'input'})
-    } else {
-      next()
-    }
-  } else if (to.meta.requireAuth) {
-    if ( !store.state.auth.user.loggedIn ){
       next({name: 'input'})
     } else {
       next()

@@ -17,7 +17,7 @@
         li(v-if="!stateLoggedIn")
           a(@click='login(); menuToggle = !menuToggle') ログイン
         li(v-if="stateLoggedIn")
-          a(@click="logout(); menuToggle = !menuToggle") ログアウト
+          a(@click="logout(); menuToggle = !menuToggle; toTop()") ログアウト
 </template>
 
 <script>
@@ -33,6 +33,10 @@ export default {
   computed: mapGetters('auth', ['stateLoggedIn']),
   methods: {
     ...mapActions('auth', ['login', 'logout']),
+    toTop() {
+      this.$router.push({name: 'input'})
+      this.$store.commit('counter/clearDocument')
+    },
     handleResize () {
       if (window.innerWidth < 481) {
         this.smallLayout = true
