@@ -34,7 +34,7 @@ export default {
   methods: {
     ...mapActions('auth', ['login', 'logout']),
     toTop() {
-      this.$router.push({name: 'input'})
+      this.$router.push({name: 'input'}).catch(err => {})
       this.$store.commit('counter/clearDocument')
     },
     handleResize () {
