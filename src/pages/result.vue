@@ -9,7 +9,7 @@
         div
           p タイトル
           input(type="text" v-model='title')
-        div
+        div(v-if="messagingIsSupported")
           p 通知設定
           input#checkbox(type='checkbox', @change='settingNotification' v-model='notification')
           label(for='checkbox') 締め切りを通知する
@@ -64,7 +64,7 @@ export default {
       }
     },
     ...mapGetters('counter', ['countedScript', 'direction', 'verticalLength', 'horizontalLength']),
-    ...mapGetters('auth', ['stateLoggedIn']),
+    ...mapGetters('auth', ['stateLoggedIn', 'messagingIsSupported']),
   },
   data () {
     return {

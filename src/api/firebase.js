@@ -20,7 +20,11 @@ let config = {
 firebase.initializeApp(config)
 const auth = firebase.auth()
 const database = firebase.firestore()
-const messaging = firebase.messaging();
+let messaging
+
+if(firebase.messaging.isSupported()) {
+  messaging = firebase.messaging()
+}
 
 
 // variable
@@ -30,7 +34,13 @@ var _documents = []
 export default {
   initFirebase () {
     auth.onAuthStateChanged(this.onAuthStateChanged.bind(this))
-    messaging.usePublicVapidKey(process.env.VUE_APP_FIRE_BASE_publicVapidKey)
+
+    if (firebase.messaging.isSupported()) {
+      messaging.usePublicVapidKey(process.env.VUE_APP_FIRE_BASE_publicVapidKey)
+      store.dispatch('auth/checkMessagingisSupported', true)
+    } else {
+      store.dispatch('auth/checkMessagingisSupported', false)
+    }
   },
 
   login () {

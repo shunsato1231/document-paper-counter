@@ -8,12 +8,14 @@ export default {
       loggedIn: false,
       uid: '',
       name: ''
-    }
+    },
+    messagingIsSupported: '',
   },
 
   getters: {
     userData: state => state.user,
-    stateLoggedIn: state => state.user.loggedIn
+    stateLoggedIn: state => state.user.loggedIn,
+    messagingIsSupported: state => state.messagingIsSupported,
   },
 
   mutations: {
@@ -23,12 +25,20 @@ export default {
 
     setUser (state, { key, val }) {
       Vue.set(state.user, key, val)
-    }
+    },
+
+    setMessagingIsSupported(state, isSupported) {
+      state.messagingIsSupported = isSupported
+    },
   },
 
   actions: {
     onAuthStateChanged ({ commit }, user) {
       commit('onAuthStateChanged', { user })
+    },
+
+    checkMessagingisSupported ({ commit }, isSupported) {
+      commit('setMessagingIsSupported', isSupported)
     },
 
     login () {
