@@ -63,7 +63,8 @@ export default {
         }
       }
     },
-    ...mapGetters('counter', ['countedScript', 'direction', 'verticalLength', 'horizontalLength'])
+    ...mapGetters('counter', ['countedScript', 'direction', 'verticalLength', 'horizontalLength']),
+    ...mapGetters('auth', ['stateLoggedIn']),
   },
   data () {
     return {
