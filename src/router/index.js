@@ -62,7 +62,7 @@ router.beforeResolve((to, from, next) => {
 
   if(to.meta.requireAuth && !loggedIn) {
     next({name: 'input'})
-  } else if (to.meta.update && !from.meta.update) {
+  } else if (to.meta.update && !store.getters['counter/existingScriptEditFlag']) {
     store.dispatch('counter/getDocument', to.params.id)
       .then(() =>{
         store.dispatch('counter/countManuscriptText')
@@ -76,6 +76,16 @@ router.beforeResolve((to, from, next) => {
     } else {
       next()
     }
+  } else if (from.name === 'reinput') {
+    if(to.name !== 'result-update') {
+      store.commit('counter/clearDocument')
+    }
+    next()
+  } else if (from.name === 'result-update') {
+    if(to.name !== 'reinput') {
+      store.commit('counter/clearDocument')
+    }
+    next()
   } else {
     next()
   }

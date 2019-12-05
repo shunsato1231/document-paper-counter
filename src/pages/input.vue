@@ -33,7 +33,7 @@
           .plus(@click='options.horizontalLength++', :disabled='options.horizontalLength>=100')
           input.num(type='number', v-model='options.horizontalLength', min='1', max='100')
           .minas(@click='options.horizontalLength--', :disabled='options.horizontalLength<=1')
-    textarea(v-model='script')
+    textarea(v-model='script' @input='editExistingScript')
     button.countButton(@click="validation") カウントする
 </template>
 
@@ -82,6 +82,11 @@ export default {
         this.$router.push ({name: 'result-update', params: {id: this.$route.params.id}})
       } else {
         this.$router.push({name: 'result'})
+      }
+    },
+    editExistingScript () {
+      if(this.$route.meta.update) {
+        this.$store.dispatch('counter/editExistingScript')
       }
     }
   },

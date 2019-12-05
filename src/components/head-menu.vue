@@ -35,7 +35,6 @@ export default {
     ...mapActions('auth', ['login', 'logout']),
     toTop() {
       this.$router.push({name: 'input'}).catch(err => {})
-      this.$store.commit('counter/clearDocument')
     },
     handleResize () {
       if (window.innerWidth < 481) {

@@ -74,9 +74,7 @@ export default {
     }
   },
   beforeCreate () {
-    if( !this.$route.meta.update ) {
-      this.$store.dispatch('counter/countManuscriptText')
-    }
+    this.$store.dispatch('counter/countManuscriptText')
   },
   created () {
     this.scriptWidht = this.horizontalLength * this.squareSize + 1
@@ -119,6 +117,7 @@ export default {
             this.$router.push({name: 'list'})
             this.$toasted.show(title + 'を上書きしました', {duration : 1500})
             this.$store.dispatch('list/getList')
+            this.$store.dispatch('counter/resetExistingScriptEditFlag')
           })
       } else {
         this.$store.dispatch('counter/saveDocument')

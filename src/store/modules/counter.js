@@ -26,6 +26,7 @@ export default{
       notificationKey: ''
     },
     countedScript: {},
+    existingScriptEditFlag: false,
   },
   getters: {
     script: state => state.document.script,
@@ -36,7 +37,8 @@ export default{
     horizontalLength: state => state.document.options.direction === 'v' ? state.countedScript.length : state.countedScript[0].length,
     title: state => state.document.title,
     deadline: state => state.document.deadline,
-    notification: state => state.document.notification
+    notification: state => state.document.notification,
+    existingScriptEditFlag: state => state.existingScriptEditFlag
   },
   mutations: {
     setOptions (state, options) {
@@ -91,7 +93,10 @@ export default{
       state.countedScript = ''
     },
     setNotinotificationKey (state, key) {
-      state.document.notificationKey = key
+      state.notificationKey = key
+    },
+    setExistingScriptEditFlag (state, flag) {
+      state.existingScriptEditFlag = flag
     }
   },
   actions: {
@@ -281,6 +286,12 @@ export default{
             commit('setNotinotificationKey', key)
           }).catch(reject)
       })
+    },
+    editExistingScript({commit}) {
+      commit('setExistingScriptEditFlag', true)
+    },
+    resetExistingScriptEditFlag({commit}) {
+      commit('setExistingScriptEditFlag', false)
     }
   }
 }
