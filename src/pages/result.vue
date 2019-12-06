@@ -8,7 +8,8 @@
       .inputMeta(v-if="stateLoggedIn")
         div
           p タイトル
-          input(type="text" v-model='title')
+          div
+            input(type="text" v-model='title')
         div(v-if="messagingIsSupported")
           p 通知設定
           input#checkbox(type='checkbox', @change='settingNotification' v-model='notification')
@@ -82,6 +83,13 @@ export default {
   },
   mounted () {
     this.scrollToLeft()
+
+    const inputTags = document.querySelectorAll('input');
+    inputTags.forEach(input => {
+      if(input.type === 'text') {
+        input.parentNode.classList.add('wrapInputText')
+      }
+    })
   },
   methods: {
     ...mapActions('counter', ['saveDocument']),
@@ -338,15 +346,27 @@ export default {
   .year:hover { border: 1px solid #fafafa; }
   .vdp-datepicker__calendar .cell.selected, .vdp-datepicker__calendar .cell.selected:hover, .vdp-datepicker__calendar .cell.selected.highlighted, .vdp-datepicker__calendar header .prev:not(.disabled):hover, .vdp-datepicker__calendar header .next:not(.disabled):hover, .vdp-datepicker__calendar header .up:not(.disabled):hover { background: #fafafa; }
   .vdp-datepicker__calendar .cell:not(.blank):not(.disabled).day:hover, .vdp-datepicker__calendar .cell:not(.blank):not(.disabled).month:hover, .vdp-datepicker__calendar .cell:not(.blank):not(.disabled).year:hover { border: 1px solid #ccc; }
-  input {
-    @include font-size(14);
-    font-family: $gothic;
-    outline: none;
-    width: 100%;
-    padding: 10px;
+
+  .wrapInputText {
     border: solid 1px #ccc;
-    &:disabled {
-      background-color: #eee;
+    background: #fff;
+    width: 100%;
+    height: 40px;
+
+    input {
+      width: 200%;
+      height: 200%;
+      padding: 20px;
+      @include font-size(28);
+      font-family: $gothic;
+      transform-origin: left top;
+      transform: scale(0.5);
+      outline: none;
+      border: none;
+      background: none;
+      &:disabled {
+        background-color: #eee;
+      }
     }
   }
 </style>

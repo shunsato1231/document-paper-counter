@@ -33,7 +33,8 @@
           .plus(@click='options.horizontalLength++', :disabled='options.horizontalLength>=100')
           input.num(type='number', v-model='options.horizontalLength', min='1', max='100')
           .minas(@click='options.horizontalLength--', :disabled='options.horizontalLength<=1')
-    textarea(v-model='script' @input='editExistingScript')
+    .wrapTextArea
+      textarea(v-model='script' @input='editExistingScript')
     button.countButton(@click="validation") カウントする
 </template>
 
@@ -164,19 +165,6 @@ label{
   }
 }
 
-textarea{
-  padding: 10px;
-  width: 100%;
-  height: 300px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  border: solid 1px #ccc;
-  resize: none;
-  @include font-size(14);
-  font-family: $gothic;
-}
-
 .squaresForm{
   display: flex;
   height: 70px;
@@ -260,6 +248,31 @@ input[type="number"] {
     -moz-appearance:textfield;
 }
 
+.wrapTextArea{
+  position: relative;
+  width: 100%;
+  height: 300px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  border: solid 1px #ccc;
+  background: #fff;
+
+  textarea {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    padding: 20px;
+    @include font-size(28);
+    transform-origin: left top;
+    transform: scale(0.5);
+    font-family: $gothic;
+    resize: none;
+    border: none;
+    background: none;
+  }
+}
+
 .countButton{
   -moz-transition: 0.3s;
   -o-transition: 0.3s;
@@ -281,4 +294,5 @@ input[type="number"] {
     color: #f2f2e9;
   }
 }
+
 </style>

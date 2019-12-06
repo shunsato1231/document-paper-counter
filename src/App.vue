@@ -9,7 +9,20 @@ import HeadMenu from '@/components/head-menu.vue'
 
 export default {
   name: 'App',
-  components: { HeadMenu }
+  components: { HeadMenu },
+  mounted () {
+    window.addEventListener("touchstart", this.mobileNoScroll, { passive: false })
+  },
+  destroyed () {
+    window.addEventListener("touchstart", this.mobileNoScroll, { passive: false })
+  },
+  methods: {
+    mobileNoScroll: function(event) {
+      if (event.touches.length >= 2) {
+        event.preventDefault();
+      }
+    }
+  }
 }
 </script>
 
