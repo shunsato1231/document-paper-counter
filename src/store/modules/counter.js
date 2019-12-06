@@ -93,7 +93,7 @@ export default{
       state.countedScript = ''
     },
     setNotinotificationKey (state, key) {
-      state.notificationKey = key
+      state.document.notificationKey = key
     },
     setExistingScriptEditFlag (state, flag) {
       state.existingScriptEditFlag = flag
@@ -283,6 +283,7 @@ export default{
           .then(token => Firebase.setNotinotificationKey(token))
           .then(key => {
             resolve(key)
+            console.log(key)
             commit('setNotinotificationKey', key)
           }).catch(reject)
       })
